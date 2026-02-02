@@ -109,6 +109,15 @@ button:hover {
   background-color: #3949ab;
 }
 
+#cancel-delete-btn {
+  margin-top: 20px;
+}
+
+#confirm-delete-btn {
+  margin-top: 20px;
+  margin-right: 12px;
+}
+
 .message {
   margin-top: 20px;
   padding: 10px;

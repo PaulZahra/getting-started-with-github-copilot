@@ -152,10 +152,10 @@ document.addEventListener("DOMContentLoaded", () => {
     popup.style.zIndex = "9999";
 
     popup.innerHTML = `
-      <div style="background:white;padding:24px 32px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.2);text-align:center;max-width:320px;">
+      <div style="background:white;padding:20px 28px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.2);text-align:center;max-width:320px;">
         <p>Are you sure you want to remove <strong>${participantEmail}</strong> from <strong>${activityName}</strong>?</p>
-        <button id="confirm-delete-btn" style="margin-right:12px;padding-top:4px">Yes</button>
-        <button id="cancel-delete-btn" style="padding-top:4px">Cancel</button>
+        <button id="confirm-delete-btn">Yes</button>
+        <button id="cancel-delete-btn">Cancel</button>
       </div>
     `;
     document.body.appendChild(popup);
