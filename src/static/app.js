@@ -28,7 +28,16 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="participants-section">
               <strong>Participants:</strong>
               <ul class="participants-list">
-                ${details.participants.map((email) => `<li>${email}</li>`).join("")}
+                ${details.participants
+                  .map(
+                    (email) => `
+                  <li class="participant-item" data-activity="${name}" data-email="${email}">
+                    <span class="participant-email">${email}</span>
+                    <span class="delete-participant" title="Remove participant" style="cursor:pointer; color:#c62828; margin-left:8px; font-size:18px;">&#128465;</span>
+                  </li>
+                `,
+                  )
+                  .join("")}
               </ul>
             </div>
           `;
@@ -49,6 +58,20 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
 
         activitiesList.appendChild(activityCard);
+
+        // Add delete event listeners after rendering
+        setTimeout(() => {
+          activityCard
+            .querySelectorAll(".delete-participant")
+            .forEach((icon) => {
+              icon.addEventListener("click", function (e) {
+                const li = this.closest(".participant-item");
+                const participantEmail = li.getAttribute("data-email");
+                const activityName = li.getAttribute("data-activity");
+                showDeleteConfirmation(activityName, participantEmail, li);
+              });
+            });
+        }, 0);
 
         // Add option to select dropdown
         const option = document.createElement("option");
@@ -105,4 +128,81 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initialize app
   fetchActivities();
+  // Delete confirmation popup
+  function showDeleteConfirmation(
+    activityName,
+    participantEmail,
+    participantLi,
+  ) {
+    // Remove any existing popup
+    const existing = document.getElementById("delete-confirm-popup");
+    if (existing) existing.remove();
+
+    const popup = document.createElement("div");
+    popup.id = "delete-confirm-popup";
+    popup.style.position = "fixed";
+    popup.style.top = "0";
+    popup.style.left = "0";
+    popup.style.width = "100vw";
+    popup.style.height = "100vh";
+    popup.style.background = "rgba(0,0,0,0.3)";
+    popup.style.display = "flex";
+    popup.style.alignItems = "center";
+    popup.style.justifyContent = "center";
+    popup.style.zIndex = "9999";
+
+    popup.innerHTML = `
+      <div style="background:white;padding:24px 32px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.2);text-align:center;max-width:320px;">
+        <p>Are you sure you want to remove <strong>${participantEmail}</strong> from <strong>${activityName}</strong>?</p>
+        <button id="confirm-delete-btn" style="margin-right:12px;padding-top:4px">Yes</button>
+        <button id="cancel-delete-btn" style="padding-top:4px">Cancel</button>
+      </div>
+    `;
+    document.body.appendChild(popup);
+
+    document.getElementById("confirm-delete-btn").onclick = async function () {
+      await unregisterParticipant(
+        activityName,
+        participantEmail,
+        participantLi,
+      );
+      popup.remove();
+    };
+    document.getElementById("cancel-delete-btn").onclick = function () {
+      popup.remove();
+    };
+  }
+
+  // Unregister participant (frontend only, backend call needed)
+  async function unregisterParticipant(
+    activityName,
+    participantEmail,
+    participantLi,
+  ) {
+    try {
+      const response = await fetch(
+        `/activities/${encodeURIComponent(activityName)}/unregister?email=${encodeURIComponent(participantEmail)}`,
+        {
+          method: "POST",
+        },
+      );
+      const result = await response.json();
+      if (response.ok) {
+        participantLi.remove();
+        messageDiv.textContent = result.message || "Participant removed.";
+        messageDiv.className = "success";
+      } else {
+        messageDiv.textContent =
+          result.detail || "Failed to remove participant.";
+        messageDiv.className = "error";
+      }
+      messageDiv.classList.remove("hidden");
+      setTimeout(() => messageDiv.classList.add("hidden"), 5000);
+    } catch (error) {
+      messageDiv.textContent = "Failed to remove participant.";
+      messageDiv.className = "error";
+      messageDiv.classList.remove("hidden");
+      setTimeout(() => messageDiv.classList.add("hidden"), 5000);
+    }
+  }
 });
