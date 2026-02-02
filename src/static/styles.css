@@ -183,9 +183,9 @@ footer {
   font-size: 18px;
   transition: color 0.2s;
 }
+
 .delete-participant:hover {
   color: #a31515;
-}
 }
 
 .participants-section.no-participants {
